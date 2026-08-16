@@ -14,6 +14,11 @@ const UPLOADS_DIR = path.resolve(__dirname, "../../uploads");
 // Tighter rate limit for AI endpoints (they call external APIs and handle file uploads)
 const aiLimiter = rateLimit({ windowMs: 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
 
+function isAiConfigurationError(err) {
+  const message = err?.message || "";
+  return /AZURE_|DefaultAzureCredential|credential/i.test(message);
+}
+
 function createCartValidationError(message) {
   const err = new Error(message);
   err.status = 400;
@@ -154,8 +159,8 @@ router.post("/transcribe", aiLimiter, upload.single("audio"), async (req, res) =
     if (err.status) {
       return res.status(err.status).json({ success: false, error: err.message });
     }
-    if (err.message.includes("GITHUB_TOKEN")) {
-      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
+    if (isAiConfigurationError(err)) {
+      return res.status(503).json({ success: false, error: "AI backend not configured. Set required Azure AI environment variables and credentials." });
     }
     res.status(500).json({ success: false, error: err.message });
   }
@@ -249,8 +254,8 @@ router.post("/parse-text", aiLimiter, async (req, res) => {
     if (err.status) {
       return res.status(err.status).json({ success: false, error: err.message });
     }
-    if (err.message.includes("GITHUB_TOKEN")) {
-      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
+    if (isAiConfigurationError(err)) {
+      return res.status(503).json({ success: false, error: "AI backend not configured. Set required Azure AI environment variables and credentials." });
     }
     res.status(500).json({ success: false, error: err.message });
   }
@@ -366,8 +371,8 @@ router.post("/parse-audio", aiLimiter, upload.single("audio"), async (req, res) 
     if (err.status) {
       return res.status(err.status).json({ success: false, error: err.message });
     }
-    if (err.message.includes("GITHUB_TOKEN")) {
-      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
+    if (isAiConfigurationError(err)) {
+      return res.status(503).json({ success: false, error: "AI backend not configured. Set required Azure AI environment variables and credentials." });
     }
     res.status(500).json({ success: false, error: err.message });
   }
@@ -458,8 +463,8 @@ router.post("/recommendations", aiLimiter, async (req, res) => {
 
     res.json({ success: true, message: result.message, recommendations: enriched });
   } catch (err) {
-    if (err.message.includes("GITHUB_TOKEN")) {
-      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
+    if (isAiConfigurationError(err)) {
+      return res.status(503).json({ success: false, error: "AI backend not configured. Set required Azure AI environment variables and credentials." });
     }
     res.status(500).json({ success: false, error: err.message });
   }
