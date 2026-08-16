@@ -592,7 +592,8 @@ document.getElementById('suggestBtn').addEventListener('click', () => {
   statusEl.hidden = false;
   input.value = '';
   setTimeout(() => { statusEl.hidden = true; }, 5000);
-=======
+});
+
 document.getElementById('copyJsonBtn').addEventListener('click', () => {
   const text = document.getElementById('aiJsonOutput').textContent;
   navigator.clipboard.writeText(text).then(() => showToast('JSON copiado al portapapeles', 'success')).catch(() => showToast('No se pudo copiar', 'error'));
