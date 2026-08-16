@@ -86,6 +86,83 @@ const upload = multer({
 
 /**
  * @swagger
+ * /api/ai/transcribe:
+ *   post:
+ *     summary: Transcribe an audio file to text
+ *     description: |
+ *       Accepts an audio file (mp3, wav, webm, ogg, m4a) and returns only the raw
+ *       transcription using OpenAI Whisper. No product parsing is performed.
+ *       Use the transcription result with /api/ai/parse-text to generate an order.
+ *     tags: [AI]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - audio
+ *             properties:
+ *               audio:
+ *                 type: string
+ *                 format: binary
+ *                 description: Audio file (mp3, wav, webm, ogg, m4a — max 25 MB)
+ *     responses:
+ *       200:
+ *         description: Audio transcribed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 transcription:
+ *                   type: string
+ *                   description: Raw transcription text
+ *                   example: "Necesito dos galones de cloro y jabón antibacterial"
+ *       400:
+ *         description: No audio file uploaded or invalid format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       503:
+ *         description: OpenAI API key not configured
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post("/transcribe", aiLimiter, upload.single("audio"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, error: "Audio file is required. Field name: 'audio'" });
+  }
+
+  const filename = req.uploadedFilename;
+  if (!filename) {
+    return res.status(400).json({ success: false, error: "Upload processing error" });
+  }
+  const safePath = path.join(UPLOADS_DIR, path.basename(filename));
+
+  try {
+    const transcription = await transcribeAudio(safePath);
+    fs.unlink(safePath, () => {});
+    res.json({ success: true, transcription });
+  } catch (err) {
+    fs.unlink(safePath, () => {});
+    if (err.status) {
+      return res.status(err.status).json({ success: false, error: err.message });
+    }
+    if (err.message.includes("GITHUB_TOKEN")) {
+      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
+    }
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
  * /api/ai/parse-text:
  *   post:
  *     summary: Parse a text message into cart items
