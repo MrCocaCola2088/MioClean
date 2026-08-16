@@ -14,6 +14,11 @@ const UPLOADS_DIR = path.resolve(__dirname, "../../uploads");
 // Tighter rate limit for AI endpoints (they call external APIs and handle file uploads)
 const aiLimiter = rateLimit({ windowMs: 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
 
+function isAiConfigurationError(err) {
+  const message = err?.message || "";
+  return /AZURE_|DefaultAzureCredential|credential/i.test(message);
+}
+
 function createCartValidationError(message) {
   const err = new Error(message);
   err.status = 400;

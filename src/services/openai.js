@@ -1,4 +1,6 @@
 const OpenAI = require("openai");
+const { AIProjectClient } = require("@azure/ai-projects");
+const { DefaultAzureCredential } = require("@azure/identity");
 const { products } = require("../models/products");
 
 // Azure OpenAI endpoint — uses an Azure API key for auth.
@@ -8,6 +10,20 @@ const MODEL_CHAT = process.env.AZURE_OPENAI_CHAT_DEPLOYMENT || "gpt-5-mini";
 const MODEL_AUDIO = process.env.AZURE_OPENAI_AUDIO_DEPLOYMENT || "whisper-1";
 
 let openai = null;
+let agentOpenAIClient = null;
+
+function getAgentConfig() {
+  return {
+    endpoint: process.env.AZURE_AI_PROJECT_ENDPOINT,
+    agentName: process.env.AZURE_AI_AGENT_NAME,
+    agentVersion: process.env.AZURE_AI_AGENT_VERSION,
+  };
+}
+
+function shouldUseAgentParse() {
+  const { endpoint, agentName, agentVersion } = getAgentConfig();
+  return Boolean(endpoint && agentName && agentVersion);
+}
 
 function getProductFamilyKey(productName = "") {
   return productName.replace(/\s+\d+(?:[.,]\d+)?L$/i, "").trim().toLowerCase();
@@ -44,6 +60,7 @@ function normalizeParsedItemsBySize(items = [], message = "") {
 function getClient() {
   if (!openai) {
     const apiKey = process.env.AZURE_OPENAI_API_KEY;
+    const azureOpenAIEndpoint = process.env.AZURE_OPENAI_ENDPOINT || DEFAULT_AZURE_OPENAI_ENDPOINT;
     if (!apiKey) {
       const err = new Error(
         "AZURE_OPENAI_API_KEY environment variable is not set. " +
@@ -53,13 +70,83 @@ function getClient() {
       throw err;
     }
     openai = new OpenAI({
-      baseURL: `${AZURE_OPENAI_ENDPOINT}openai/deployments/${MODEL_CHAT}`,
+      baseURL: `${azureOpenAIEndpoint}openai/deployments/${MODEL_CHAT}`,
       apiKey,
       defaultHeaders: { "api-key": apiKey },
       defaultQuery: { "api-version": "2024-02-01" },
     });
   }
   return openai;
+}
+
+function getAgentOpenAIClient() {
+  const { endpoint, agentName, agentVersion } = getAgentConfig();
+  if (!endpoint || !agentName || !agentVersion) {
+    throw new Error("AZURE_AI_PROJECT_ENDPOINT, AZURE_AI_AGENT_NAME, and AZURE_AI_AGENT_VERSION are required");
+  }
+
+  if (!agentOpenAIClient) {
+    const projectClient = new AIProjectClient(endpoint, new DefaultAzureCredential());
+    agentOpenAIClient = projectClient.getOpenAIClient();
+  }
+
+  return { client: agentOpenAIClient, agentName, agentVersion };
+}
+
+function parseAgentOutput(outputText) {
+  if (!outputText || typeof outputText !== "string") {
+    throw new Error("Azure AI agent returned an empty response");
+  }
+
+  try {
+    return JSON.parse(outputText);
+  } catch {
+    const start = outputText.indexOf("{");
+    const end = outputText.lastIndexOf("}");
+    if (start < 0 || end <= start) {
+      throw new Error("Azure AI agent response was not valid JSON");
+    }
+    return JSON.parse(outputText.slice(start, end + 1));
+  }
+}
+
+async function parseShoppingRequestWithAgent(message) {
+  const { client, agentName, agentVersion } = getAgentOpenAIClient();
+
+  const conversation = await client.conversations.create({
+    items: [
+      {
+        type: "message",
+        role: "user",
+        content:
+          `Analiza esta solicitud de compra para el catálogo de MioClean y responde SOLO con JSON válido.\n\n` +
+          `Estructura exacta requerida:\n` +
+          `{"items":[{"productId":"MC-XXX","quantity":1,"matchedName":"texto original"}],"unrecognized":[],"summary":"resumen breve en español"}\n\n` +
+          `Mensaje del cliente: ${message}`,
+      },
+    ],
+  });
+
+  const response = await client.responses.create(
+    { conversation: conversation.id },
+    {
+      body: {
+        agent: {
+          name: agentName,
+          version: agentVersion,
+          type: "agent_reference",
+        },
+      },
+    }
+  );
+
+  const parsed = parseAgentOutput(response.output_text);
+  return {
+    items: Array.isArray(parsed.items) ? parsed.items : [],
+    unrecognized: Array.isArray(parsed.unrecognized) ? parsed.unrecognized : [],
+    summary: typeof parsed.summary === "string" ? parsed.summary : "Pedido procesado",
+    raw: response.output_text,
+  };
 }
 
 /**
@@ -70,18 +157,26 @@ function getClient() {
  * @returns {Promise<{items: Array, raw: string}>}
  */
 async function parseShoppingRequest(message) {
-  const client = getClient();
+  let parsed;
+  let raw;
 
-  const catalog = products.map((p) => ({
-    id: p.id,
-    name: p.name,
-    nameEn: p.nameEn,
-    sizeL: p.sizeL,
-    tags: p.tags.join(", "),
-    unit: p.unit,
-  }));
+  if (shouldUseAgentParse()) {
+    const agentParsed = await parseShoppingRequestWithAgent(message);
+    parsed = agentParsed;
+    raw = agentParsed.raw;
+  } else {
+    const client = getClient();
 
-  const systemPrompt = `Eres un asistente de ventas para MioClean, una distribuidora de artículos de limpieza.
+    const catalog = products.map((p) => ({
+      id: p.id,
+      name: p.name,
+      nameEn: p.nameEn,
+      sizeL: p.sizeL,
+      tags: p.tags.join(", "),
+      unit: p.unit,
+    }));
+
+    const systemPrompt = `Eres un asistente de ventas para MioClean, una distribuidora de artículos de limpieza.
 Tu tarea es analizar el mensaje del cliente e identificar qué productos quiere comprar y en qué cantidad.
 
 CATÁLOGO DE PRODUCTOS DISPONIBLES (JSON):
@@ -114,8 +209,10 @@ Reglas:
     temperature: 0.2,
   });
 
-  const raw = response.choices[0].message.content;
-  const parsed = JSON.parse(raw);
+    raw = response.choices[0].message.content;
+    parsed = JSON.parse(raw);
+  }
+
   const normalizedItems = normalizeParsedItemsBySize(parsed.items, message);
 
   return { ...parsed, items: normalizedItems, raw };
@@ -140,7 +237,7 @@ async function transcribeAudio(filePath) {
 
   const transcription = await client.audio.transcriptions.create({
     file: fs.createReadStream(resolvedPath),
-    model: "whisper-1",
+    model: MODEL_AUDIO,
     language: "es",
     response_format: "text",
   });
