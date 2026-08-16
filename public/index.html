@@ -23,6 +23,7 @@
       <li><a href="#inicio">Inicio</a></li>
       <li><a href="#catalogo">Catálogo</a></li>
       <li><a href="#ia-pedidos">Pedido IA</a></li>
+      <li><a href="#lista-deseos">Lista de Deseos ❤️</a></li>
       <li><a href="#nosotros">Nosotros</a></li>
       <li><a href="#contacto">Contacto</a></li>
       <li><a href="/api-docs" target="_blank" class="nav-api-btn">API Docs</a></li>
@@ -172,6 +173,34 @@
   </div>
 </section>
 
+<!-- WISH LIST -->
+<section class="wishlist-section" id="lista-deseos">
+  <div class="container">
+    <div class="section-header">
+      <h2>❤️ Mi Lista de Deseos</h2>
+      <p>Guarda los productos que te interesan para comprarlos más tarde</p>
+    </div>
+    <div class="wishlist-grid" id="wishlistGrid">
+      <div class="wishlist-empty" id="wishlistEmpty">
+        <span>❤️</span>
+        <p>Tu lista de deseos está vacía. Agrega productos desde el catálogo.</p>
+        <a href="#catalogo" class="btn btn-outline">Ver Catálogo</a>
+      </div>
+    </div>
+    <div class="wishlist-suggest">
+      <h3>💡 ¿No encuentras lo que buscas?</h3>
+      <p>Sugiérenos un producto y lo evaluaremos para añadir a nuestro catálogo.</p>
+      <div class="suggest-form">
+        <textarea id="suggestInput" class="suggest-textarea" rows="3" placeholder="Ej: Desinfectante en spray de 500ml, esponjas de acero, bolsas para basura industrial..."></textarea>
+        <button class="btn btn-primary" id="suggestBtn">
+          <span>✉️</span> Enviar Sugerencia
+        </button>
+      </div>
+      <div id="suggestStatus" class="suggest-status" hidden></div>
+    </div>
+  </div>
+</section>
+
 <!-- NOSOTROS -->
 <section class="nosotros-section" id="nosotros">
   <div class="container">
@@ -226,7 +255,7 @@
       <span class="brand-icon">🧹</span><span>Mio<strong>Clean</strong></span>
       <p>Tu distribuidora inteligente de artículos de limpieza.</p>
     </div>
-    <div class="footer-links"><h4>Productos</h4><ul><li><a href="#catalogo">Detergentes</a></li><li><a href="#catalogo">Desinfectantes</a></li><li><a href="#catalogo">Equipos</a></li><li><a href="#catalogo">Descartables</a></li></ul></div>
+    <div class="footer-links"><h4>Productos</h4><ul><li><a href="#catalogo">Detergentes</a></li><li><a href="#catalogo">Desinfectantes</a></li><li><a href="#lista-deseos">Lista de Deseos ❤️</a></li></ul></div>
     <div class="footer-links"><h4>Empresa</h4><ul><li><a href="#nosotros">Nosotros</a></li><li><a href="#contacto">Contacto</a></li><li><a href="/api-docs" target="_blank">API Docs</a></li><li><a href="/api-docs.json" target="_blank">OpenAPI JSON</a></li></ul></div>
     <div class="footer-links"><h4>Soporte</h4><ul><li><a href="mailto:contacto@mioclean.com">contacto@mioclean.com</a></li><li><a href="tel:+59176444069">+591 76444069</a></li></ul></div>
   </div>
