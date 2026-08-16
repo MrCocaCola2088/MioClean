@@ -3,21 +3,31 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const rateLimit = require("express-rate-limit");
 const { v4: uuidv4 } = require("uuid");
 const { parseShoppingRequest, transcribeAudio, getRecommendations } = require("../services/openai");
 const { addItemToCart, getOrCreateCart } = require("../models/cart");
 const { products } = require("../models/products");
 
+const UPLOADS_DIR = path.resolve(__dirname, "../../uploads");
+
+// Tighter rate limit for AI endpoints (they call external APIs and handle file uploads)
+const aiLimiter = rateLimit({ windowMs: 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
+
 // Multer config for audio uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.join(__dirname, "../../uploads");
+    const dir = path.resolve(__dirname, "../../uploads");
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname) || ".webm";
-    cb(null, `audio-${uuidv4()}${ext}`);
+    const name = `audio-${uuidv4()}${ext}`;
+    // Store the server-generated filename in req so route handlers
+    // can reconstruct the path without relying on req.file.path (user-tainted).
+    req.uploadedFilename = name;
+    cb(null, name);
   },
 });
 
@@ -93,7 +103,7 @@ const upload = multer({
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/parse-text", async (req, res) => {
+router.post("/parse-text", aiLimiter, async (req, res) => {
   const { message, sessionId, autoAddToCart } = req.body;
 
   if (!message || typeof message !== "string" || message.trim() === "") {
@@ -129,8 +139,8 @@ router.post("/parse-text", async (req, res) => {
       cart,
     });
   } catch (err) {
-    if (err.message.includes("OPENAI_API_KEY")) {
-      return res.status(503).json({ success: false, error: "OpenAI API not configured. Set OPENAI_API_KEY." });
+    if (err.message.includes("GITHUB_TOKEN")) {
+      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
     }
     res.status(500).json({ success: false, error: err.message });
   }
@@ -194,16 +204,23 @@ router.post("/parse-text", async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/parse-audio", upload.single("audio"), async (req, res) => {
+router.post("/parse-audio", aiLimiter, upload.single("audio"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, error: "Audio file is required. Field name: 'audio'" });
   }
 
   const { sessionId, autoAddToCart } = req.body;
 
+  // Reconstruct path from server-generated filename (breaks taint from req.file.path)
+  const filename = req.uploadedFilename;
+  if (!filename) {
+    return res.status(400).json({ success: false, error: "Upload processing error" });
+  }
+  const safePath = path.join(UPLOADS_DIR, path.basename(filename));
+
   try {
     // 1. Transcribe
-    const transcription = await transcribeAudio(req.file.path, req.file.mimetype);
+    const transcription = await transcribeAudio(safePath, req.file.mimetype);
 
     // 2. Parse
     const parsed = await parseShoppingRequest(transcription);
@@ -227,7 +244,7 @@ router.post("/parse-audio", upload.single("audio"), async (req, res) => {
     }
 
     // Clean up uploaded file
-    fs.unlink(req.file.path, () => {});
+    fs.unlink(safePath, () => {});
 
     res.json({
       success: true,
@@ -238,9 +255,9 @@ router.post("/parse-audio", upload.single("audio"), async (req, res) => {
       cart,
     });
   } catch (err) {
-    fs.unlink(req.file.path, () => {});
-    if (err.message.includes("OPENAI_API_KEY")) {
-      return res.status(503).json({ success: false, error: "OpenAI API not configured. Set OPENAI_API_KEY." });
+    if (safePath) fs.unlink(safePath, () => {});
+    if (err.message.includes("GITHUB_TOKEN")) {
+      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
     }
     res.status(500).json({ success: false, error: err.message });
   }
@@ -311,7 +328,7 @@ router.post("/parse-audio", upload.single("audio"), async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/recommendations", async (req, res) => {
+router.post("/recommendations", aiLimiter, async (req, res) => {
   const { sessionId, context } = req.body;
   if (!sessionId) {
     return res.status(400).json({ success: false, error: "sessionId is required" });
@@ -331,8 +348,8 @@ router.post("/recommendations", async (req, res) => {
 
     res.json({ success: true, message: result.message, recommendations: enriched });
   } catch (err) {
-    if (err.message.includes("OPENAI_API_KEY")) {
-      return res.status(503).json({ success: false, error: "OpenAI API not configured. Set OPENAI_API_KEY." });
+    if (err.message.includes("GITHUB_TOKEN")) {
+      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
     }
     res.status(500).json({ success: false, error: err.message });
   }

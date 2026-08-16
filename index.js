@@ -4,6 +4,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./src/swagger");
 
@@ -15,6 +16,10 @@ const ordersRouter = require("./src/routes/orders");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ─── Rate Limiters ────────────────────────────────────────────────────────────
+const generalLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false });
+const swaggerLimiter = rateLimit({ windowMs: 5 * 60 * 1000, max: 60, standardHeaders: true, legacyHeaders: false });
 
 // ─── Security & Utilities ────────────────────────────────────────────────────
 app.use(
@@ -43,6 +48,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // ─── Swagger UI ───────────────────────────────────────────────────────────────
 app.use(
   "/api-docs",
+  swaggerLimiter,
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
     customCss: `
@@ -61,12 +67,13 @@ app.use(
 );
 
 // Expose raw OpenAPI spec as JSON
-app.get("/api-docs.json", (req, res) => {
+app.get("/api-docs.json", swaggerLimiter, (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(swaggerSpec);
 });
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
+app.use("/api", generalLimiter);
 app.use("/api/products", productsRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/ai", aiRouter);
@@ -110,12 +117,12 @@ app.get("/api/health", (req, res) => {
     service: "MioClean API",
     version: "1.0.0",
     timestamp: new Date().toISOString(),
-    openai: process.env.OPENAI_API_KEY ? "configured" : "not configured",
+    github_models: process.env.GITHUB_TOKEN ? "configured" : "not configured",
   });
 });
 
 // ─── SPA fallback ─────────────────────────────────────────────────────────────
-app.get("*", (req, res) => {
+app.get("/{*path}", generalLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
@@ -134,7 +141,7 @@ if (require.main === module) {
     console.log(`\n🧹 MioClean API running at http://localhost:${PORT}`);
     console.log(`📚 Swagger docs:      http://localhost:${PORT}/api-docs`);
     console.log(`📄 OpenAPI JSON:      http://localhost:${PORT}/api-docs.json`);
-    console.log(`🔑 OpenAI:            ${process.env.OPENAI_API_KEY ? "✅ Configured" : "❌ Not configured (set OPENAI_API_KEY)"}\n`);
+    console.log(`🔑 GitHub Models:     ${process.env.GITHUB_TOKEN ? "✅ Configured" : "❌ Not configured (set GITHUB_TOKEN)"}\n`);
   });
 }
 

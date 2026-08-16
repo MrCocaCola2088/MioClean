@@ -1,10 +1,12 @@
 {
   "name": "mioclean",
   "version": "1.0.0",
-  "description": "",
+  "description": "MioClean — AI-powered cleaning products distributor website with GitHub Models integration",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node -e \"require(\"./index.js\"); console.log(\"✅ App loads without errors\"); process.exit(0);\""
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.6.2",
     "helmet": "^8.3.0",
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
@@ -24,5 +27,8 @@
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^14.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

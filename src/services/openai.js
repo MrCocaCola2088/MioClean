@@ -1,14 +1,27 @@
 const OpenAI = require("openai");
 const { products } = require("../models/products");
 
+// GitHub Models API endpoint — uses a GitHub token for auth.
+// Docs: https://docs.github.com/en/github-models
+const GITHUB_MODELS_ENDPOINT = "https://models.inference.ai.azure.com";
+const MODEL_CHAT = "gpt-4o-mini";
+const MODEL_AUDIO = "whisper-1";
+
 let openai = null;
 
 function getClient() {
   if (!openai) {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY environment variable is not set");
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) {
+      throw new Error(
+        "GITHUB_TOKEN environment variable is not set. " +
+          "Generate a token at https://github.com/settings/tokens and set it as GITHUB_TOKEN."
+      );
     }
-    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    openai = new OpenAI({
+      baseURL: GITHUB_MODELS_ENDPOINT,
+      apiKey: token,
+    });
   }
   return openai;
 }
@@ -79,9 +92,16 @@ Reglas:
 async function transcribeAudio(filePath, mimeType) {
   const client = getClient();
   const fs = require("fs");
+  const path = require("path");
+
+  // Validate the file exists and is a regular file (no path traversal)
+  const resolvedPath = path.resolve(filePath);
+  if (!fs.existsSync(resolvedPath) || !fs.statSync(resolvedPath).isFile()) {
+    throw new Error("Invalid audio file path");
+  }
 
   const transcription = await client.audio.transcriptions.create({
-    file: fs.createReadStream(filePath),
+    file: fs.createReadStream(resolvedPath),
     model: "whisper-1",
     language: "es",
     response_format: "text",

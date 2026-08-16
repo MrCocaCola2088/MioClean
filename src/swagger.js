@@ -12,14 +12,20 @@ const options = {
 REST API for the MioClean AI-powered shopping platform. This API allows you to:
 
 - 🛒 **Manage shopping carts** — create, update, and retrieve cart sessions
-- 🤖 **AI smart cart** — parse natural-language text or voice messages into cart items using OpenAI GPT-4o-mini
-- 🎤 **Voice shopping** — upload an audio file and have it transcribed (Whisper) and parsed automatically
+- 🤖 **AI smart cart** — parse natural-language text or voice messages into cart items using GitHub Models (GPT-4o-mini)
+- 🎤 **Voice shopping** — upload an audio file and have it transcribed (Whisper via GitHub Models) and parsed automatically
 - 💡 **AI recommendations** — get contextual product suggestions based on cart contents
 - 📦 **Product catalog** — browse and search the full MioClean product catalog
 - 📋 **CRM export** — export cart data as structured payloads ready for CRM or external pipeline consumption
 
+### AI Backend
+This API uses the **GitHub Models API** (https://models.inference.ai.azure.com) for all AI features.  
+Set the GITHUB_TOKEN environment variable to a GitHub Personal Access Token.  
+No OpenAI account or billing is required — a free GitHub account is sufficient for the free tier.  
+Generate a token at: https://github.com/settings/tokens
+
 ### Authentication
-No authentication is required for the public endpoints. The OpenAI integration requires a valid \`OPENAI_API_KEY\` set as an environment variable on the server.
+No authentication is required for the public endpoints. The AI endpoints require a valid GITHUB_TOKEN set as an environment variable on the server.
 
 ### Language
 The API accepts requests and returns responses in Spanish and English. Product data is bilingual (Spanish primary, English secondary fields suffixed with \`En\`).
