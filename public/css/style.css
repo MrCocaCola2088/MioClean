@@ -188,6 +188,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 .file-upload-label:hover { border-color: rgba(255,255,255,.6); background: rgba(255,255,255,.07); }
 .file-upload-label input { display: none; }
 .audio-filename { font-size: .8rem; color: rgba(255,255,255,.6); text-align: center; min-height: 1.2em; }
+.transcription-label { display: block; font-size: .85rem; color: rgba(255,255,255,.8); font-weight: 600; margin-bottom: .35rem; margin-top: .75rem; }
 
 /* AI Results */
 .ai-results { background: rgba(255,255,255,.97); border-radius: var(--radius); padding: 2rem; color: var(--text); }
