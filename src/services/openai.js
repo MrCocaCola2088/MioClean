@@ -1,9 +1,8 @@
 const OpenAI = require("openai");
 const { products } = require("../models/products");
 
-// GitHub Models API endpoint — uses a GitHub token for auth.
-// Docs: https://docs.github.com/en/github-models
-const GITHUB_MODELS_ENDPOINT = "https://models.inference.ai.azure.com";
+// Azure OpenAI endpoint — uses an Azure API key for auth.
+const AZURE_OPENAI_ENDPOINT = "https://azure-openai-euu-001.openai.azure.com/";
 const MODEL_CHAT = "gpt-4o-mini";
 const MODEL_AUDIO = "whisper-1";
 
@@ -43,16 +42,18 @@ function normalizeParsedItemsBySize(items = [], message = "") {
 
 function getClient() {
   if (!openai) {
-    const token = process.env.GITHUB_TOKEN;
-    if (!token) {
+    const apiKey = process.env.AZURE_OPENAI_API_KEY;
+    if (!apiKey) {
       throw new Error(
-        "GITHUB_TOKEN environment variable is not set. " +
-          "Generate a token at https://github.com/settings/tokens and set it as GITHUB_TOKEN."
+        "AZURE_OPENAI_API_KEY environment variable is not set. " +
+          "Set it to your Azure OpenAI resource key."
       );
     }
     openai = new OpenAI({
-      baseURL: GITHUB_MODELS_ENDPOINT,
-      apiKey: token,
+      baseURL: `${AZURE_OPENAI_ENDPOINT}openai/deployments/${MODEL_CHAT}`,
+      apiKey,
+      defaultHeaders: { "api-key": apiKey },
+      defaultQuery: { "api-version": "2024-02-01" },
     });
   }
   return openai;
