@@ -105,8 +105,9 @@ router.get("/:sessionId", (req, res) => {
  */
 router.post("/:sessionId/items", (req, res) => {
   const { productId, quantity } = req.body;
+  const qty = Number.parseInt(quantity, 10);
 
-  if (!productId || !quantity || quantity < 1) {
+  if (!productId || !Number.isFinite(qty) || qty < 1) {
     return res.status(400).json({ success: false, error: "productId y quantity son requeridos / productId and quantity are required" });
   }
 
@@ -115,11 +116,11 @@ router.post("/:sessionId/items", (req, res) => {
     return res.status(404).json({ success: false, error: "Producto no encontrado / Product not found" });
   }
 
-  if (product.stock < quantity) {
+  if (product.stock < qty) {
     return res.status(400).json({ success: false, error: `Stock insuficiente / Insufficient stock. Available: ${product.stock}` });
   }
 
-  const cart = addItemToCart(req.params.sessionId, product, parseInt(quantity));
+  const cart = addItemToCart(req.params.sessionId, product, qty);
   res.json({ success: true, cart });
 });
 
