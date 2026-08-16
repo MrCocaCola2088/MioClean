@@ -220,6 +220,7 @@ async function loadProducts() {
     allProducts = pData.products;
     renderCategories(cData.categories);
     renderProducts(allProducts);
+    renderWishlist();
   } catch (e) {
     document.getElementById('productsGrid').innerHTML = '<p class="no-results">Error cargando productos. Intenta de nuevo.</p>';
   }
@@ -246,13 +247,7 @@ function renderCategories(cats) {
 }
 
 function filterProducts() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  const inStock = document.getElementById('inStockOnly').checked;
-  let filtered = allProducts;
-  if (activeCategory) filtered = filtered.filter(p => p.category === activeCategory);
-  if (q) filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || p.tags.some(t => t.includes(q)));
-  if (inStock) filtered = filtered.filter(p => p.stock > 0);
-  renderProducts(filtered);
+  renderProducts(filterProductsResult());
 }
 
 function renderProducts(prods) {
@@ -274,15 +269,24 @@ function renderProducts(prods) {
           <div class="product-price">${fmt(p.price)}</div>
           <div class="product-unit">/ ${p.unit}</div>
         </div>
-        <button class="add-btn" data-id="${p.id}" ${p.stock === 0 ? 'disabled' : ''}>
-          ${p.stock === 0 ? 'Agotado' : 'Add to Cart'}
-        </button>
+        <div class="product-actions">
+          <button class="wishlist-btn ${isInWishlist(p.id) ? 'active' : ''}" data-id="${p.id}" title="${isInWishlist(p.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}">
+            ${isInWishlist(p.id) ? '❤️' : '🤍'}
+          </button>
+          <button class="add-btn" data-id="${p.id}" ${p.stock === 0 ? 'disabled' : ''}>
+            ${p.stock === 0 ? 'Agotado' : 'Add to Cart'}
+          </button>
+        </div>
       </div>
     </div>
   `).join('');
 
   grid.querySelectorAll('.add-btn:not([disabled])').forEach(btn => {
     btn.addEventListener('click', () => addToCart(btn.dataset.id, 1));
+  });
+
+  grid.querySelectorAll('.wishlist-btn').forEach(btn => {
+    btn.addEventListener('click', () => toggleWishlist(btn.dataset.id));
   });
 }
 
@@ -438,6 +442,100 @@ document.getElementById('addAllToCartBtn').addEventListener('click', async () =>
 
 document.getElementById('closeResults').addEventListener('click', () => {
   document.getElementById('aiResults').hidden = true;
+});
+
+// ─── Wish List ────────────────────────────────────────────────────────────────
+
+const WISHLIST_KEY = 'mioclean_wishlist';
+
+function getWishlist() {
+  try { return JSON.parse(localStorage.getItem(WISHLIST_KEY)) || []; } catch { return []; }
+}
+
+function saveWishlist(list) {
+  localStorage.setItem(WISHLIST_KEY, JSON.stringify(list));
+}
+
+function isInWishlist(productId) {
+  return getWishlist().includes(productId);
+}
+
+function toggleWishlist(productId) {
+  let list = getWishlist();
+  if (list.includes(productId)) {
+    list = list.filter(id => id !== productId);
+    showToast('Eliminado de la lista de deseos');
+  } else {
+    list.push(productId);
+    showToast('❤️ Agregado a la lista de deseos', 'success');
+  }
+  saveWishlist(list);
+  renderProducts(filterProductsResult());
+  renderWishlist();
+}
+
+function filterProductsResult() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const inStock = document.getElementById('inStockOnly').checked;
+  let filtered = allProducts;
+  if (activeCategory) filtered = filtered.filter(p => p.category === activeCategory);
+  if (q) filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || p.tags.some(t => t.includes(q)));
+  if (inStock) filtered = filtered.filter(p => p.stock > 0);
+  return filtered;
+}
+
+function renderWishlist() {
+  const grid = document.getElementById('wishlistGrid');
+  const emptyEl = document.getElementById('wishlistEmpty');
+  const list = getWishlist();
+  const items = allProducts.filter(p => list.includes(p.id));
+
+  if (!items.length) {
+    emptyEl.hidden = false;
+    grid.querySelectorAll('.wishlist-product-card').forEach(el => el.remove());
+    return;
+  }
+  emptyEl.hidden = true;
+
+  const existing = new Set(Array.from(grid.querySelectorAll('.wishlist-product-card')).map(el => el.dataset.id));
+  items.forEach(p => { if (!existing.has(p.id)) existing.delete(p.id); });
+
+  grid.querySelectorAll('.wishlist-product-card').forEach(el => {
+    if (!list.includes(el.dataset.id)) el.remove();
+  });
+
+  items.forEach(p => {
+    if (grid.querySelector(`.wishlist-product-card[data-id="${p.id}"]`)) return;
+    const card = document.createElement('div');
+    card.className = 'wishlist-product-card';
+    card.dataset.id = p.id;
+    card.innerHTML = `
+      <div class="wl-img">${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy" />` : categoryEmoji(p.category)}</div>
+      <div class="wl-info">
+        <div class="wl-name">${p.name}</div>
+        <div class="wl-price">${fmt(p.price)} <span class="wl-unit">/ ${p.unit}</span></div>
+      </div>
+      <div class="wl-actions">
+        <button class="add-btn wl-add-btn" data-id="${p.id}" ${p.stock === 0 ? 'disabled' : ''}>${p.stock === 0 ? 'Agotado' : 'Add to Cart'}</button>
+        <button class="wl-remove-btn" data-id="${p.id}" title="Remove from Wishlist">🗑️</button>
+      </div>
+    `;
+    grid.insertBefore(card, emptyEl);
+    card.querySelector('.wl-add-btn:not([disabled])')?.addEventListener('click', () => addToCart(p.id, 1));
+    card.querySelector('.wl-remove-btn').addEventListener('click', () => toggleWishlist(p.id));
+  });
+}
+
+document.getElementById('suggestBtn').addEventListener('click', () => {
+  const input = document.getElementById('suggestInput');
+  const statusEl = document.getElementById('suggestStatus');
+  const text = input.value.trim();
+  if (!text) { showToast('Escribe tu sugerencia primero', 'warning'); return; }
+  statusEl.className = 'suggest-status success';
+  statusEl.textContent = '✅ ¡Gracias por tu sugerencia! La revisaremos pronto.';
+  statusEl.hidden = false;
+  input.value = '';
+  setTimeout(() => { statusEl.hidden = true; }, 5000);
 });
 
 // ─── Contact Form ─────────────────────────────────────────────────────────────
