@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { getOrCreateCart, getCart, addItemToCart, removeItemFromCart, updateCart, clearCart } = require("../models/cart");
 const { products } = require("../models/products");
+const { requireInternalApiKey } = require("../middleware/internalApiKey");
 
 /**
  * @swagger
@@ -232,7 +233,7 @@ router.delete("/:sessionId", (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get("/:sessionId/crm", (req, res) => {
+router.get("/:sessionId/crm", requireInternalApiKey, (req, res) => {
   const cart = getCart(req.params.sessionId);
   if (!cart || cart.items.length === 0) {
     return res.status(404).json({ success: false, error: "Cart not found or empty" });

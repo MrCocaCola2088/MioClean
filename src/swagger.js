@@ -25,7 +25,7 @@ No OpenAI account or billing is required — a free GitHub account is sufficient
 Generate a token at: https://github.com/settings/tokens
 
 ### Authentication
-No authentication is required for the public endpoints. The AI endpoints require a valid GITHUB_TOKEN set as an environment variable on the server.
+No authentication is required for the public catalog/cart and AI endpoints. The AI endpoints require a valid GITHUB_TOKEN set as an environment variable on the server. Internal Orders and CRM export endpoints also require INTERNAL_API_KEY to be set on the server and the matching \`x-api-key\` request header.
 
 ### Language
 The API accepts requests and returns responses in Spanish and English. Product data is bilingual (Spanish primary, English secondary fields suffixed with \`En\`).

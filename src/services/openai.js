@@ -86,10 +86,9 @@ Reglas:
  * Transcribe an audio file to text using OpenAI Whisper.
  *
  * @param {string} filePath - Absolute path to the audio file
- * @param {string} mimeType - MIME type of the file
  * @returns {Promise<string>} Transcribed text
  */
-async function transcribeAudio(filePath, mimeType) {
+async function transcribeAudio(filePath) {
   const client = getClient();
   const fs = require("fs");
   const path = require("path");

@@ -6,11 +6,11 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "test": "node -e \"require(\"./index.js\"); console.log(\"✅ App loads without errors\"); process.exit(0);\""
+    "test": "node -e \"require('./index.js'); console.log('✅ App loads without errors'); process.exit(0);\""
   },
   "repository": {
     "type": "git",
-    "url": "http://localhost:26831/MrCocaCola2088/MioClean"
+    "url": "https://github.com/MrCocaCola2088/MioClean.git"
   },
   "keywords": [],
   "author": "",

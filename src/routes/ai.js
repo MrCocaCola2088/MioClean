@@ -14,6 +14,39 @@ const UPLOADS_DIR = path.resolve(__dirname, "../../uploads");
 // Tighter rate limit for AI endpoints (they call external APIs and handle file uploads)
 const aiLimiter = rateLimit({ windowMs: 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
 
+function createCartValidationError(message) {
+  const err = new Error(message);
+  err.status = 400;
+  return err;
+}
+
+function validateCartQuantity(product, quantity) {
+  const qty = Number.parseInt(quantity, 10);
+
+  if (!Number.isFinite(qty) || qty < 1) {
+    throw createCartValidationError("productId y quantity son requeridos / productId and quantity are required");
+  }
+
+  if (product.stock < qty) {
+    throw createCartValidationError(`Stock insuficiente / Insufficient stock. Available: ${product.stock}`);
+  }
+
+  return qty;
+}
+
+function autoAddValidatedItemsToCart(sessionId, items) {
+  const validatedItems = items.map((item) => ({
+    item,
+    quantity: validateCartQuantity(item.product, item.quantity),
+  }));
+
+  for (const { item, quantity } of validatedItems) {
+    addItemToCart(sessionId, item.product, quantity);
+  }
+
+  return getOrCreateCart(sessionId);
+}
+
 // Multer config for audio uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -125,10 +158,7 @@ router.post("/parse-text", aiLimiter, async (req, res) => {
     // Auto-add to cart if requested
     let cart = null;
     if (autoAddToCart && sessionId) {
-      for (const item of enrichedItems) {
-        addItemToCart(sessionId, item.product, item.quantity);
-      }
-      cart = getOrCreateCart(sessionId);
+      cart = autoAddValidatedItemsToCart(sessionId, enrichedItems);
     }
 
     res.json({
@@ -139,6 +169,9 @@ router.post("/parse-text", aiLimiter, async (req, res) => {
       cart,
     });
   } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ success: false, error: err.message });
+    }
     if (err.message.includes("GITHUB_TOKEN")) {
       return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
     }
@@ -220,7 +253,7 @@ router.post("/parse-audio", aiLimiter, upload.single("audio"), async (req, res) 
 
   try {
     // 1. Transcribe
-    const transcription = await transcribeAudio(safePath, req.file.mimetype);
+    const transcription = await transcribeAudio(safePath);
 
     // 2. Parse
     const parsed = await parseShoppingRequest(transcription);
@@ -237,10 +270,7 @@ router.post("/parse-audio", aiLimiter, upload.single("audio"), async (req, res) 
     // 4. Auto-add to cart
     let cart = null;
     if (autoAddToCart === "true" && sessionId) {
-      for (const item of enrichedItems) {
-        addItemToCart(sessionId, item.product, item.quantity);
-      }
-      cart = getOrCreateCart(sessionId);
+      cart = autoAddValidatedItemsToCart(sessionId, enrichedItems);
     }
 
     // Clean up uploaded file
@@ -256,6 +286,9 @@ router.post("/parse-audio", aiLimiter, upload.single("audio"), async (req, res) 
     });
   } catch (err) {
     if (safePath) fs.unlink(safePath, () => {});
+    if (err.status) {
+      return res.status(err.status).json({ success: false, error: err.message });
+    }
     if (err.message.includes("GITHUB_TOKEN")) {
       return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
     }

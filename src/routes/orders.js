@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { getAllCarts, getCart } = require("../models/cart");
+const { requireInternalApiKey } = require("../middleware/internalApiKey");
+
+router.use(requireInternalApiKey);
 
 /**
  * @swagger

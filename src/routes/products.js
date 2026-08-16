@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { products, categories } = require("../models/products");
+const { products } = require("../models/products");
 
 /**
  * @swagger
