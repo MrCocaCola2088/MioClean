@@ -146,6 +146,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 .product-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); display: flex; flex-direction: column; }
 .product-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 .product-img { aspect-ratio: 4/3; background: var(--bg-alt); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; position: relative; }
+.product-img img { width: 100%; height: 100%; object-fit: cover; }
 .product-badge { position: absolute; top: .6rem; right: .6rem; background: var(--accent); color: #fff; font-size: .7rem; font-weight: 700; padding: .2rem .5rem; border-radius: 999px; }
 .product-badge.out { background: #ef4444; }
 .product-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; gap: .3rem; }

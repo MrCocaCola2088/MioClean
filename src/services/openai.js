@@ -9,6 +9,38 @@ const MODEL_AUDIO = "whisper-1";
 
 let openai = null;
 
+function getProductFamilyKey(productName = "") {
+  return productName.replace(/\s+\d+(?:[.,]\d+)?L$/i, "").trim().toLowerCase();
+}
+
+function extractRequestedLiters(text = "") {
+  const match = text.match(/(\d+(?:[.,]\d+)?)\s*(?:l|lt|litro|litros)\b/i);
+  if (!match) return null;
+  const value = Number.parseFloat(match[1].replace(",", "."));
+  return Number.isFinite(value) ? value : null;
+}
+
+function normalizeParsedItemsBySize(items = [], message = "") {
+  const byId = new Map(products.map((p) => [p.id, p]));
+  return (items || []).map((item) => {
+    const product = byId.get(item.productId);
+    if (!product || typeof product.sizeL !== "number") return item;
+
+    const requestedLiters = extractRequestedLiters(item.matchedName || message);
+    if (!requestedLiters || product.sizeL === requestedLiters) return item;
+
+    const familyKey = getProductFamilyKey(product.name);
+    const candidate = products.find(
+      (p) =>
+        typeof p.sizeL === "number" &&
+        p.sizeL === requestedLiters &&
+        getProductFamilyKey(p.name) === familyKey
+    );
+
+    return candidate ? { ...item, productId: candidate.id } : item;
+  });
+}
+
 function getClient() {
   if (!openai) {
     const token = process.env.GITHUB_TOKEN;
@@ -40,6 +72,7 @@ async function parseShoppingRequest(message) {
     id: p.id,
     name: p.name,
     nameEn: p.nameEn,
+    sizeL: p.sizeL,
     tags: p.tags.join(", "),
     unit: p.unit,
   }));
@@ -63,6 +96,7 @@ Reglas:
 - Si el cliente pide "cloro", busca en los tags y nombres del catálogo.
 - Si no especifica cantidad, asume 1.
 - Si menciona "docena" = 12, "caja" puede referirse al unit del producto.
+- Si el cliente especifica presentación en litros (ej. 1L, 3L, 5L), elige el productId de ese tamaño exacto.
 - Solo incluye productos que estén en el catálogo.
 - El productId debe ser exactamente el del catálogo.`;
 
@@ -78,8 +112,9 @@ Reglas:
 
   const raw = response.choices[0].message.content;
   const parsed = JSON.parse(raw);
+  const normalizedItems = normalizeParsedItemsBySize(parsed.items, message);
 
-  return { ...parsed, raw };
+  return { ...parsed, items: normalizedItems, raw };
 }
 
 /**
@@ -124,6 +159,7 @@ async function getRecommendations(cartItems, context = "") {
     name: p.name,
     category: p.category,
     price: p.price,
+    sizeL: p.sizeL,
     unit: p.unit,
     tags: p.tags.join(", "),
   }));

@@ -261,7 +261,7 @@ function renderProducts(prods) {
   grid.innerHTML = prods.map(p => `
     <div class="product-card">
       <div class="product-img">
-        ${categoryEmoji(p.category)}
+        ${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy" />` : categoryEmoji(p.category)}
         <span class="product-badge ${p.stock === 0 ? 'out' : ''}">${p.stock > 0 ? 'In Stock' : 'Agotado'}</span>
       </div>
       <div class="product-body">
