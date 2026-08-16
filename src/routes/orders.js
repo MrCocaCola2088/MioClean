@@ -5,6 +5,19 @@ const { requireInternalApiKey } = require("../middleware/internalApiKey");
 
 router.use(requireInternalApiKey);
 
+const INTERNAL_API_TOKEN = process.env.INTERNAL_API_TOKEN;
+
+function requireInternalToken(req, res, next) {
+  if (!INTERNAL_API_TOKEN) return next();
+  const token = req.get("x-internal-token");
+  if (token !== INTERNAL_API_TOKEN) {
+    return res.status(401).json({ success: false, error: "Unauthorized" });
+  }
+  return next();
+}
+
+router.use(requireInternalToken);
+
 /**
  * @swagger
  * tags:
