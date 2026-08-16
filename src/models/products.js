@@ -90,7 +90,7 @@ const products = [
     image: "https://github.com/user-attachments/assets/242eb95e-b5e0-46db-bdae-47e4c6615c71",
   },
   {
-    id: "MC-003",
+    id: "MC-011",
     name: "Jabón Líquido Multiuso 2L",
     nameEn: "Multi-Purpose Liquid Soap 2L",
     category: "jabones",
@@ -107,7 +107,7 @@ const products = [
     image: "https://github.com/user-attachments/assets/3f4db4c7-8d37-4806-9b0d-f5c5d4d7d3c9",
   },
   {
-    id: "MC-004",
+    id: "MC-012",
     name: "Desengrasante Industrial 5L",
     nameEn: "Industrial Degreaser 5L",
     category: "desengrasantes",

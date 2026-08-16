@@ -3,8 +3,9 @@ const { products } = require("../models/products");
 
 // Azure OpenAI endpoint — uses an Azure API key for auth.
 const AZURE_OPENAI_ENDPOINT = "https://azure-openai-euu-001.openai.azure.com/";
-const MODEL_CHAT = "gpt-4o-mini";
-const MODEL_AUDIO = "whisper-1";
+// Deployment name must match an actual deployment created in the Azure resource.
+const MODEL_CHAT = process.env.AZURE_OPENAI_CHAT_DEPLOYMENT || "gpt-5-mini";
+const MODEL_AUDIO = process.env.AZURE_OPENAI_AUDIO_DEPLOYMENT || "whisper-1";
 
 let openai = null;
 
@@ -44,10 +45,12 @@ function getClient() {
   if (!openai) {
     const apiKey = process.env.AZURE_OPENAI_API_KEY;
     if (!apiKey) {
-      throw new Error(
+      const err = new Error(
         "AZURE_OPENAI_API_KEY environment variable is not set. " +
           "Set it to your Azure OpenAI resource key."
       );
+      err.status = 503;
+      throw err;
     }
     openai = new OpenAI({
       baseURL: `${AZURE_OPENAI_ENDPOINT}openai/deployments/${MODEL_CHAT}`,
@@ -102,7 +105,7 @@ Reglas:
 - El productId debe ser exactamente el del catálogo.`;
 
   const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: MODEL_CHAT,
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: message },
@@ -182,7 +185,7 @@ Responde SOLO con JSON:
 }`;
 
   const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: MODEL_CHAT,
     messages: [{ role: "user", content: prompt }],
     response_format: { type: "json_object" },
     temperature: 0.4,

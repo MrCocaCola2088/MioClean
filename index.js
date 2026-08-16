@@ -31,7 +31,9 @@ app.use(
         scriptSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"],
         styleSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com", "fonts.googleapis.com"],
         fontSrc: ["'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com"],
-        imgSrc: ["'self'", "data:", "blob:"],
+        // Product images are served from github.com/user-attachments, which redirects to a
+        // rotating github-production-user-asset-*.s3.amazonaws.com signed URL — allow any https image host.
+        imgSrc: ["'self'", "data:", "blob:", "https:"],
         connectSrc: ["'self'"],
         mediaSrc: ["'self'", "blob:"],
       },

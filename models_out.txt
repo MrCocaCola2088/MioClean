@@ -1,0 +1,796 @@
+﻿[Output too large (26KB). Full output saved to: c:\Users\Eduar\AppData\Roaming\Code\copilot-terminal-output\copilot-terminal-output-5db92f77-f6c1-4cb5-96b5-7345d266e24e.txt]
+[Use readFile or grep to examine the full output.]
+
+ Eduar   MioClean   main ↑2    
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "fine_tune": 1813017600,
+        "inference": 1813017600
+      },
+      "id": "gpt-4o-mini-tts",
+      "status": "succeeded",
+      "created_at": 1765756800,
+      "updated_at": 1765756800,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+       
+
+[... middle of output truncated ...]
+
+cceeded",
+      "created_at": 1783382400,
+      "updated_at": 1783382400,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1831161600
+      },
+      "id": "gpt-5.6-terra",
+      "status": "succeeded",
+      "created_at": 1783555200,
+      "updated_at": 1783555200,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1831161600
+      },
+      "id": "gpt-5.6-luna",
+      "status": "succeeded",
+      "created_at": 1783555200,
+      "updated_at": 1783555200,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1831161600
+      },
+      "id": "gpt-5.6-sol",
+      "status": "succeeded",
+      "created_at": 1783555200,
+      "updated_at": 1783555200,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": false,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1832544000
+      },
+      "id": "gpt-offline-whisper-1",
+      "status": "succeeded",
+      "created_at": 1785110400,
+      "updated_at": 1785110400,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": false,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1832976000
+      },
+      "id": "gpt-live-transcribe",
+      "status": "succeeded",
+      "created_at": 1785196800,
+      "updated_at": 1785196800,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": false,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1816732800
+      },
+      "id": "gpt-transcribe",
+      "status": "succeeded",
+      "created_at": 1785196800,
+      "updated_at": 1785196800,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 4102358400
+      },
+      "id": "Codestral-2501",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1769731200
+      },
+      "id": "jais-30b-chat",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1781308800
+      },
+      "id": "Llama-3.2-11B-Vision-Instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1781308800
+      },
+      "id": "Llama-3.2-90B-Vision-Instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "fine_tune": 4102358400,
+        "inference": 4102358400
+      },
+      "id": "Llama-3.3-70B-Instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1751241600
+      },
+      "id": "Meta-Llama-3-70B-Instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1751241600
+      },
+      "id": "Meta-Llama-3-8B-Instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1751241600
+      },
+      "id": "Meta-Llama-3.1-70B-Instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1781308800
+      },
+      "id": "Meta-Llama-3.1-8B-Instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1769731200
+      },
+      "id": "Mistral-Large-2411",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1756512000
+      },
+      "id": "Phi-3-medium-128k-instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1756512000
+      },
+      "id": "Phi-3-medium-4k-instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1756512000
+      },
+      "id": "Phi-3-mini-128k-instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1756512000
+      },
+      "id": "Phi-3-mini-4k-instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1756512000
+      },
+      "id": "Phi-3-small-128k-instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1756512000
+      },
+      "id": "Phi-3-small-8k-instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1756512000
+      },
+      "id": "Phi-3.5-mini-instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1756512000
+      },
+      "id": "Phi-3.5-MoE-instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1756512000
+      },
+      "id": "Phi-3.5-vision-instruct",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 4102358400
+      },
+      "id": "Phi-4",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "fine_tune": 4102358400,
+        "inference": 4102358400
+      },
+      "id": "gpt-oss-20b",
+      "status": "succeeded",
+      "created_at": 1727740800,
+      "updated_at": 1744778733,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1792368000
+      },
+      "id": "claude-sonnet-4-5",
+      "status": "succeeded",
+      "created_at": 1760918400,
+      "updated_at": 1760918400,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1792368000
+      },
+      "id": "claude-haiku-4-5",
+      "status": "succeeded",
+      "created_at": 1761872400,
+      "updated_at": 1761872400,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1785888000
+      },
+      "id": "claude-opus-4-1",
+      "status": "succeeded",
+      "created_at": 1761868800,
+      "updated_at": 1761868800,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1792368000
+      },
+      "id": "claude-opus-4-5",
+      "status": "succeeded",
+      "created_at": 1763683200,
+      "updated_at": 1763683200,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1819756800
+      },
+      "id": "claude-opus-4-8",
+      "status": "succeeded",
+      "created_at": 1779757200,
+      "updated_at": 1779757200,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1814313600
+      },
+      "id": "claude-sonnet-5",
+      "status": "succeeded",
+      "created_at": 1782262800,
+      "updated_at": 1782262800,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1834617600
+      },
+      "id": "DeepSeek-V4-Flash",
+      "status": "succeeded",
+      "created_at": 1777334400,
+      "updated_at": 1777334400,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1834617600
+      },
+      "id": "DeepSeek-V4-Pro",
+      "status": "succeeded",
+      "created_at": 1777334400,
+      "updated_at": 1777334400,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "generally-available",
+      "deprecation": {
+        "inference": 1815004800
+      },
+      "id": "claude-opus-5",
+      "status": "succeeded",
+      "created_at": 1783382400,
+      "updated_at": 1783382400,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1796256000
+      },
+      "id": "DeepSeek-V4-Flash-0731",
+      "status": "succeeded",
+      "created_at": 1785888000,
+      "updated_at": 1785888000,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": false,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1786752000
+      },
+      "id": "MAI-Image-2",
+      "status": "succeeded",
+      "created_at": 1771545600,
+      "updated_at": 1771545600,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": false,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1787097600
+      },
+      "id": "MAI-Image-2e",
+      "status": "succeeded",
+      "created_at": 1775520000,
+      "updated_at": 1775520000,
+      "object": "model"
+    },
+    {
+      "capabilities": {
+        "fine_tune": false,
+        "inference": true,
+        "completion": false,
+        "chat_completion": true,
+        "embeddings": false,
+        "scale_types": []
+      },
+      "lifecycle_status": "preview",
+      "deprecation": {
+        "inference": 1793750400
+      },
+      "id": "MAI-Thinking-1",
+      "status": "succeeded",
+      "created_at": 1780272000,
+      "updated_at": 1785801600,
+      "object": "model"
+    }
+  ],
+  "object": "list"
+}

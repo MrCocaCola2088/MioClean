@@ -154,9 +154,6 @@ router.post("/transcribe", aiLimiter, upload.single("audio"), async (req, res) =
     if (err.status) {
       return res.status(err.status).json({ success: false, error: err.message });
     }
-    if (err.message.includes("GITHUB_TOKEN")) {
-      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
-    }
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -248,9 +245,6 @@ router.post("/parse-text", aiLimiter, async (req, res) => {
   } catch (err) {
     if (err.status) {
       return res.status(err.status).json({ success: false, error: err.message });
-    }
-    if (err.message.includes("GITHUB_TOKEN")) {
-      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
     }
     res.status(500).json({ success: false, error: err.message });
   }
@@ -366,9 +360,6 @@ router.post("/parse-audio", aiLimiter, upload.single("audio"), async (req, res) 
     if (err.status) {
       return res.status(err.status).json({ success: false, error: err.message });
     }
-    if (err.message.includes("GITHUB_TOKEN")) {
-      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
-    }
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -458,8 +449,8 @@ router.post("/recommendations", aiLimiter, async (req, res) => {
 
     res.json({ success: true, message: result.message, recommendations: enriched });
   } catch (err) {
-    if (err.message.includes("GITHUB_TOKEN")) {
-      return res.status(503).json({ success: false, error: "GitHub Models API not configured. Set GITHUB_TOKEN. See https://github.com/settings/tokens" });
+    if (err.status) {
+      return res.status(err.status).json({ success: false, error: err.message });
     }
     res.status(500).json({ success: false, error: err.message });
   }
