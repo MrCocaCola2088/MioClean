@@ -13,6 +13,7 @@ const productsRouter = require("./src/routes/products");
 const cartRouter = require("./src/routes/cart");
 const aiRouter = require("./src/routes/ai");
 const ordersRouter = require("./src/routes/orders");
+const contactRouter = require("./src/routes/contact");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -78,6 +79,7 @@ app.use("/api/products", productsRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/ai", aiRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/contact", contactRouter);
 
 // ─── Health Check ────────────────────────────────────────────────────────────
 /**

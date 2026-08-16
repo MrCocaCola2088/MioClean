@@ -28,6 +28,7 @@
     "playwright": "^1.63.0-alpha-2026-08-05",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
+    "twilio": "^6.1.0",
     "uuid": "^14.0.1"
   },
   "engines": {

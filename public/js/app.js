@@ -442,14 +442,43 @@ document.getElementById('closeResults').addEventListener('click', () => {
 
 // ─── Contact Form ─────────────────────────────────────────────────────────────
 
-document.getElementById('contactForm').addEventListener('submit', e => {
+document.getElementById('contactForm').addEventListener('submit', async e => {
   e.preventDefault();
+  const btn = e.target.querySelector('[type=submit]');
   const statusEl = document.getElementById('formStatus');
-  statusEl.className = 'form-status success';
-  statusEl.textContent = '✅ ¡Mensaje enviado! Te contactaremos pronto.';
+  btn.disabled = true;
+
+  const body = {
+    nombre: document.getElementById('cNombre').value.trim(),
+    email: document.getElementById('cEmail').value.trim(),
+    empresa: document.getElementById('cEmpresa').value.trim(),
+    mensaje: document.getElementById('cMensaje').value.trim(),
+    sessionId: getSessionId(),
+  };
+
+  try {
+    const res = await fetch(`${API}/api/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (data.success) {
+      statusEl.className = 'form-status success';
+      statusEl.textContent = '✅ ¡Mensaje enviado! Te contactaremos pronto.';
+      e.target.reset();
+    } else {
+      statusEl.className = 'form-status error';
+      statusEl.textContent = `❌ Error: ${data.error}`;
+    }
+  } catch {
+    statusEl.className = 'form-status error';
+    statusEl.textContent = '❌ Error al enviar el mensaje. Intenta de nuevo.';
+  }
+
   statusEl.hidden = false;
-  e.target.reset();
-  setTimeout(() => { statusEl.hidden = true; }, 5000);
+  btn.disabled = false;
+  setTimeout(() => { statusEl.hidden = true; }, 6000);
 });
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
