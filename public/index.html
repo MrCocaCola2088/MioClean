@@ -137,11 +137,15 @@
           </label>
           <div id="audioFileName" class="audio-filename"></div>
         </div>
+        <div id="transcriptionArea" hidden>
+          <label class="transcription-label">📝 Transcripción:</label>
+          <textarea id="transcriptionText" class="ai-textarea" rows="3" placeholder="Transcripción del audio..."></textarea>
+        </div>
         <div class="ai-options">
           <label class="checkbox-label"><input type="checkbox" id="audioAutoAdd" /> Add to cart automatically</label>
         </div>
         <button class="btn btn-primary btn-full" id="parseAudioBtn" disabled>
-          <span class="btn-icon">🎧</span> Transcribe &amp; Parse
+          <span class="btn-icon">✨</span> Parse Order
         </button>
       </div>
     </div>

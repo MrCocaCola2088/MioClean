@@ -324,6 +324,7 @@ let mediaRecorder = null;
 let audioChunks = [];
 let recordedBlob = null;
 let selectedFile = null;
+let currentTranscription = null;
 
 const recordBtn = document.getElementById('recordBtn');
 const recordIcon = document.getElementById('recordIcon');
@@ -331,6 +332,35 @@ const recordLabel = document.getElementById('recordLabel');
 const parseAudioBtn = document.getElementById('parseAudioBtn');
 const audioFileInput = document.getElementById('audioFileInput');
 const audioFileName = document.getElementById('audioFileName');
+const transcriptionArea = document.getElementById('transcriptionArea');
+const transcriptionText = document.getElementById('transcriptionText');
+
+async function autoTranscribe(blob, filename) {
+  audioFileName.textContent = '⏳ Transcribiendo...';
+  parseAudioBtn.disabled = true;
+  transcriptionArea.hidden = true;
+  currentTranscription = null;
+
+  try {
+    const fd = new FormData();
+    fd.append('audio', blob, filename);
+    const res = await fetch(`${API}/api/ai/transcribe`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      showToast(data.error || 'Error al transcribir', 'error');
+      audioFileName.textContent = filename;
+      return;
+    }
+    currentTranscription = data.transcription;
+    transcriptionText.value = data.transcription;
+    transcriptionArea.hidden = false;
+    parseAudioBtn.disabled = false;
+    audioFileName.textContent = filename + ' — transcripción lista';
+  } catch (e) {
+    showToast('Error de conexión al transcribir', 'error');
+    audioFileName.textContent = filename;
+  }
+}
 
 recordBtn.addEventListener('click', async () => {
   if (mediaRecorder && mediaRecorder.state === 'recording') {
@@ -344,12 +374,11 @@ recordBtn.addEventListener('click', async () => {
     audioChunks = [];
     mediaRecorder = new MediaRecorder(stream);
     mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-    mediaRecorder.onstop = () => {
+    mediaRecorder.onstop = async () => {
       recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
       stream.getTracks().forEach(t => t.stop());
-      audioFileName.textContent = `Grabación lista (${(recordedBlob.size / 1024).toFixed(1)} KB)`;
-      parseAudioBtn.disabled = false;
       selectedFile = null;
+      await autoTranscribe(recordedBlob, 'recording.webm');
     };
     mediaRecorder.start();
     recordBtn.classList.add('recording');
@@ -357,35 +386,34 @@ recordBtn.addEventListener('click', async () => {
   } catch (e) { showToast('No se pudo acceder al micrófono', 'error'); }
 });
 
-audioFileInput.addEventListener('change', e => {
+audioFileInput.addEventListener('change', async e => {
   const file = e.target.files[0];
   if (!file) return;
   selectedFile = file;
   recordedBlob = null;
-  audioFileName.textContent = file.name;
-  parseAudioBtn.disabled = false;
+  await autoTranscribe(file, file.name);
 });
 
 parseAudioBtn.addEventListener('click', async () => {
-  const blob = selectedFile || recordedBlob;
-  if (!blob) { showToast('Sube o graba un audio primero', 'warning'); return; }
+  const text = transcriptionText.value.trim();
+  if (!text) { showToast('No hay transcripción para analizar', 'warning'); return; }
   const autoAdd = document.getElementById('audioAutoAdd').checked;
 
-  parseAudioBtn.disabled = true; parseAudioBtn.textContent = '⏳ Transcribiendo...';
+  parseAudioBtn.disabled = true;
+  parseAudioBtn.textContent = '⏳ Analizando...';
 
   try {
-    const fd = new FormData();
-    fd.append('audio', blob, selectedFile ? selectedFile.name : 'recording.webm');
-    fd.append('sessionId', getSessionId());
-    if (autoAdd) fd.append('autoAddToCart', 'true');
-
-    const res = await fetch(`${API}/api/ai/parse-audio`, { method: 'POST', body: fd });
+    const res = await fetch(`${API}/api/ai/parse-text`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, sessionId: getSessionId(), autoAddToCart: autoAdd }),
+    });
     const data = await res.json();
     if (!res.ok) { showToast(data.error || 'Error de IA', 'error'); return; }
     if (autoAdd && data.cart) { cartData = data.cart; renderCart(); }
-    displayAiResults(data, data.transcription);
+    displayAiResults(data, text);
   } catch (e) { showToast('Error de conexión', 'error'); }
-  finally { parseAudioBtn.disabled = false; parseAudioBtn.innerHTML = '<span class="btn-icon">🎧</span> Transcribe &amp; Parse'; }
+  finally { parseAudioBtn.disabled = false; parseAudioBtn.innerHTML = '<span class="btn-icon">✨</span> Parse Order'; }
 });
 
 function displayAiResults(data, transcription) {
