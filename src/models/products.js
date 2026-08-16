@@ -198,8 +198,8 @@ const products = [
   },
 ];
 
-const categories = [
-  ...new Set(products.map((p) => ({ id: p.category, name: p.category, nameEn: p.categoryEn }))),
-];
+const categories = Array.from(
+  new Map(products.map((p) => [p.category, { id: p.category, name: p.category, nameEn: p.categoryEn }])).values()
+);
 
 module.exports = { products, categories };
