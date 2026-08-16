@@ -67,7 +67,7 @@ router.get("/", (req, res) => {
       (p) =>
         p.name.toLowerCase().includes(term) ||
         p.description.toLowerCase().includes(term) ||
-        p.tags.some((t) => t.includes(term))
+        p.tags.some((t) => t.toLowerCase().includes(term))
     );
   }
 
