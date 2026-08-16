@@ -114,12 +114,14 @@ app.use("/api/contact", contactRouter);
  *                   example: configured
  */
 app.get("/api/health", (req, res) => {
+  const hasAgentConfig = Boolean(process.env.AZURE_AI_PROJECT_ENDPOINT && process.env.AZURE_AI_AGENT_NAME && process.env.AZURE_AI_AGENT_VERSION);
   res.json({
     status: "ok",
     service: "MioClean API",
     version: "1.0.0",
     timestamp: new Date().toISOString(),
-    github_models: process.env.GITHUB_TOKEN ? "configured" : "not configured",
+    ai_backend: hasAgentConfig ? "azure-ai-agent" : "azure-openai",
+    ai_configured: process.env.AZURE_OPENAI_API_KEY ? "configured" : "not configured",
   });
 });
 
@@ -143,7 +145,8 @@ if (require.main === module) {
     console.log(`\n🧹 MioClean API running at http://localhost:${PORT}`);
     console.log(`📚 Swagger docs:      http://localhost:${PORT}/api-docs`);
     console.log(`📄 OpenAPI JSON:      http://localhost:${PORT}/api-docs.json`);
-    console.log(`🔑 GitHub Models:     ${process.env.GITHUB_TOKEN ? "✅ Configured" : "❌ Not configured (set GITHUB_TOKEN)"}\n`);
+    console.log(`🔑 Azure OpenAI:      ${process.env.AZURE_OPENAI_API_KEY ? "✅ Configured" : "❌ Not configured (set AZURE_OPENAI_API_KEY)"}`);
+    console.log(`🤖 Azure AI Agent:    ${process.env.AZURE_AI_PROJECT_ENDPOINT && process.env.AZURE_AI_AGENT_NAME && process.env.AZURE_AI_AGENT_VERSION ? "✅ Enabled for parse" : "⚪ Disabled (set AZURE_AI_PROJECT_ENDPOINT, AZURE_AI_AGENT_NAME, AZURE_AI_AGENT_VERSION)"}\n`);
   });
 }
 

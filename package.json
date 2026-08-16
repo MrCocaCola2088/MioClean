@@ -16,6 +16,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/ai-projects": "^2.4.0",
+    "@azure/identity": "^4.13.1",
     "@playwright/mcp": "^0.0.79",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
