@@ -424,6 +424,34 @@ function displayAiResults(data, transcription) {
   const actionsEl = document.getElementById('aiResultsActions');
   actionsEl.hidden = lastAiItems.length === 0;
 
+  // Build and display order JSON
+  const jsonBlock = document.getElementById('aiJsonBlock');
+  const jsonOutput = document.getElementById('aiJsonOutput');
+  if (lastAiItems.length) {
+    const orderItems = lastAiItems.map(item => ({
+      productId: item.productId,
+      nombre: item.product?.name || item.productId,
+      cantidad: item.quantity,
+      unidad: item.product?.unit || '',
+      precioUnitario: item.product?.price ?? 0,
+      subtotal: parseFloat(((item.product?.price || 0) * item.quantity).toFixed(2)),
+    }));
+    const total = parseFloat(orderItems.reduce((s, i) => s + i.subtotal, 0).toFixed(2));
+    const orderJson = {
+      pedido: {
+        resumen: data.message || '',
+        items: orderItems,
+        totalAproximado: total,
+        moneda: 'BS',
+        noReconocidos: unrec,
+      }
+    };
+    jsonOutput.textContent = JSON.stringify(orderJson, null, 2);
+    jsonBlock.hidden = false;
+  } else {
+    jsonBlock.hidden = true;
+  }
+
   const resultsEl = document.getElementById('aiResults');
   resultsEl.hidden = false;
   resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -438,6 +466,11 @@ document.getElementById('addAllToCartBtn').addEventListener('click', async () =>
 
 document.getElementById('closeResults').addEventListener('click', () => {
   document.getElementById('aiResults').hidden = true;
+});
+
+document.getElementById('copyJsonBtn').addEventListener('click', () => {
+  const text = document.getElementById('aiJsonOutput').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('JSON copiado al portapapeles', 'success')).catch(() => showToast('No se pudo copiar', 'error'));
 });
 
 // ─── Contact Form ─────────────────────────────────────────────────────────────
