@@ -205,6 +205,11 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 .ai-unrecognized { background: #fef9c3; border: 1px solid #fbbf24; border-radius: var(--radius-sm); padding: .75rem 1rem; font-size: .88rem; color: #92400e; margin-bottom: 1rem; }
 .ai-unrecognized::before { content: '⚠️ No reconocido: '; font-weight: 600; }
 .ai-results-actions { display: flex; gap: 1rem; }
+.ai-json-block { margin-top: 1.5rem; border: 1px solid rgba(26,108,168,.25); border-radius: var(--radius-sm); overflow: hidden; }
+.ai-json-header { display: flex; justify-content: space-between; align-items: center; background: rgba(26,108,168,.08); padding: .5rem 1rem; font-size: .85rem; font-weight: 600; color: var(--primary); }
+.btn-copy-json { background: var(--primary); color: #fff; border: none; border-radius: var(--radius-sm); padding: .25rem .65rem; font-size: .78rem; cursor: pointer; transition: opacity .2s; }
+.btn-copy-json:hover { opacity: .85; }
+.ai-json-pre { margin: 0; padding: 1rem; background: #0f172a; color: #e2e8f0; font-size: .82rem; line-height: 1.6; overflow-x: auto; white-space: pre; font-family: 'Courier New', Courier, monospace; max-height: 340px; overflow-y: auto; }
 
 /* ── NOSOTROS ── */
 .nosotros-section { padding: 5rem 0; background: var(--bg-alt); }
