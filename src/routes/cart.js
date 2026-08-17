@@ -261,7 +261,7 @@ router.get("/:sessionId/crm", requireInternalApiKey, (req, res) => {
       subtotal: cart.subtotal,
       tax: parseFloat((cart.subtotal * 0.12).toFixed(2)),
       total: parseFloat((cart.subtotal * 1.12).toFixed(2)),
-      currency: "USD",
+      currency: "BOB",
     },
   };
 

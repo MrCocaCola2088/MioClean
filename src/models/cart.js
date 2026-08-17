@@ -79,6 +79,7 @@ function addItemToCart(sessionId, product, quantity) {
         quantity,
         unitPrice: product.price,
         unit: product.unit,
+        image: product.image || null,
         total: product.price * quantity,
       },
     ];

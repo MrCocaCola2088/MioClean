@@ -192,7 +192,7 @@ router.post("/:sessionId/submit", (req, res) => {
       subtotal: submittedCart.subtotal,
       tax: parseFloat((submittedCart.subtotal * 0.12).toFixed(2)),
       total: parseFloat((submittedCart.subtotal * 1.12).toFixed(2)),
-      currency: "USD",
+      currency: "BOB",
     },
   };
 

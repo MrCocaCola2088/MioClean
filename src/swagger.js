@@ -62,7 +62,7 @@ The API accepts requests and returns responses in Spanish and English. Product d
             category: { type: "string", example: "detergentes", description: "Category in Spanish" },
             categoryEn: { type: "string", example: "detergents", description: "Category in English" },
             brand: { type: "string", example: "MioClean Pro" },
-            price: { type: "number", format: "float", example: 45.99, description: "Price in USD" },
+            price: { type: "number", format: "float", example: 75, description: "Price in Bs (15 Bs per liter)" },
             unit: { type: "string", example: "galón", description: "Unit of measure in Spanish" },
             unitEn: { type: "string", example: "gallon", description: "Unit of measure in English" },
             stock: { type: "integer", example: 250, description: "Units available in stock" },

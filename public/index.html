@@ -42,17 +42,17 @@
   <div class="hero-bg"></div>
   <div class="container hero-inner">
     <div class="hero-text">
-      <span class="hero-badge">🤖 Impulsado por GitHub Models AI</span>
+      <span class="hero-badge">Productos MioClean</span>
       <h1>Limpieza profesional<br /><span class="accent">para tu negocio</span></h1>
-      <p>Distribuidora especializada en productos de limpieza industrial y del hogar. Realiza tus pedidos con voz o texto usando inteligencia artificial.</p>
+      <p>Jabón líquido en 1L, 4L y 5L. Escribe tu pedido en lenguaje natural y la IA lo arma en el carrito.</p>
       <div class="hero-actions">
         <a href="#catalogo" class="btn btn-primary">Ver Catálogo</a>
-        <a href="#ia-pedidos" class="btn btn-outline">Probar IA 🎤</a>
+        <a href="#ia-pedidos" class="btn btn-outline">Pedido con IA</a>
       </div>
       <div class="hero-stats">
-        <div class="stat"><strong>+200</strong><span>Productos</span></div>
-        <div class="stat"><strong>+500</strong><span>Clientes</span></div>
-        <div class="stat"><strong>24h</strong><span>Entrega</span></div>
+        <div class="stat"><strong>3</strong><span>Presentaciones</span></div>
+        <div class="stat"><strong>15bs</strong><span>por litro</span></div>
+        <div class="stat"><strong>12%</strong><span>Delivery</span></div>
       </div>
     </div>
     <div class="hero-visual">
@@ -62,13 +62,12 @@
           <span class="hero-card-title">Pedido Inteligente</span>
         </div>
         <div class="hero-card-body">
-          <div class="chat-bubble user">"Necesito 3 galones de cloro y guantes de nitrilo"</div>
+          <div class="chat-bubble user">"Necesito 2 bidones de 5 litros de jabon liquido"</div>
           <div class="chat-bubble ai">
             <span class="ai-label">🤖 MioClean IA</span>
-            ✅ Encontré 2 productos:<br/>
-            Cloro Concentrado x3 — $85.50<br/>
-            Guantes de Nitrilo x1 — $38.50<br/>
-            <strong>Total: $124.00</strong>
+            ✅ Bidón de 5L x2 — 150bs<br/>
+            Delivery (12%): 18bs<br/>
+            <strong>Total: 168bs</strong>
           </div>
         </div>
       </div>
@@ -108,16 +107,16 @@
 <section class="ai-section" id="ia-pedidos">
   <div class="container">
     <div class="section-header light">
-      <span class="section-badge">🤖 GitHub Models AI</span>
+      <span class="section-badge">🤖 Agente MioClean</span>
       <h2>Pedido Inteligente con IA</h2>
-      <p>Describe lo que necesitas en español o inglés — por texto o voz — y nuestra IA lo convierte en tu carrito automáticamente.</p>
+      <p>Describe lo que necesitas en lenguaje natural. La IA arma el JSON del pedido y puede agregarlo al carrito automáticamente.</p>
     </div>
     <div class="ai-grid">
       <div class="ai-card" id="textCard">
         <div class="ai-card-icon">💬</div>
         <h3>Pedido por Texto</h3>
         <p>Escribe lo que necesitas en lenguaje natural</p>
-        <textarea id="aiTextInput" class="ai-textarea" rows="4" placeholder="Ej: Necesito 2 galones de cloro, jabón antibacterial y una caja de bolsas negras..."></textarea>
+        <textarea id="aiTextInput" class="ai-textarea" rows="4" placeholder="Necesito 2 bidones de 5 litros de jabon liquido"></textarea>
         <div class="ai-options">
           <label class="checkbox-label"><input type="checkbox" id="textAutoAdd" checked /> Add to cart automatically</label>
         </div>
@@ -270,11 +269,11 @@
     <div class="cart-empty"><span>🛒</span><p>Tu carrito está vacío</p><a href="#catalogo" class="btn btn-outline" id="shopNowBtn">Shop Now</a></div>
   </div>
   <div class="cart-footer" id="cartFooter" hidden>
-    <div class="cart-subtotal"><span>Subtotal:</span><strong id="cartSubtotal">$0.00</strong></div>
-    <div class="cart-tax"><span>Tarifa por Servicio (12%):</span><span id="cartTax">$0.00</span></div>
-    <div class="cart-total"><span>Total:</span><strong id="cartTotal">$0.00</strong></div>
-    <button class="btn btn-primary btn-full" id="checkoutBtn">Checkout →</button>
-    <button class="btn btn-ghost btn-full" id="clearCartBtn">Clear Cart</button>
+    <div class="cart-subtotal"><span>Subtotal:</span><strong id="cartSubtotal">0bs</strong></div>
+    <div class="cart-tax"><span>Delivery (12%):</span><span id="cartTax">0bs</span></div>
+    <div class="cart-total"><span>Total:</span><strong id="cartTotal">0bs</strong></div>
+    <button class="btn btn-primary btn-full" id="checkoutBtn">Comprar →</button>
+    <button class="btn btn-ghost btn-full" id="clearCartBtn">Cancelar Pedido</button>
   </div>
 </aside>
 

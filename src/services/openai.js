@@ -1,33 +1,12 @@
 const OpenAI = require("openai");
-const { AIProjectClient } = require("@azure/ai-projects");
-const { DefaultAzureCredential } = require("@azure/identity");
 const { products } = require("../models/products");
+const { getAgentResponsesUrl, getAgentAuthHeaders } = require("../config/azureAuth");
 
-// Azure OpenAI endpoint — uses an Azure API key for auth.
-const AZURE_OPENAI_ENDPOINT = "https://azure-openai-euu-001.openai.azure.com/";
-// Deployment name must match an actual deployment created in the Azure resource.
+const DEFAULT_AZURE_OPENAI_ENDPOINT = "https://azure-openai-euu-001.openai.azure.com/";
 const MODEL_CHAT = process.env.AZURE_OPENAI_CHAT_DEPLOYMENT || "gpt-5-mini";
 const MODEL_AUDIO = process.env.AZURE_OPENAI_AUDIO_DEPLOYMENT || "whisper-1";
 
 let openai = null;
-let agentOpenAIClient = null;
-
-function getAgentConfig() {
-  return {
-    endpoint: process.env.AZURE_AI_PROJECT_ENDPOINT,
-    agentName: process.env.AZURE_AI_AGENT_NAME,
-    agentVersion: process.env.AZURE_AI_AGENT_VERSION,
-  };
-}
-
-function shouldUseAgentParse() {
-  const { endpoint, agentName, agentVersion } = getAgentConfig();
-  return Boolean(endpoint && agentName && agentVersion);
-}
-
-function getProductFamilyKey(productName = "") {
-  return productName.replace(/\s+\d+(?:[.,]\d+)?L$/i, "").trim().toLowerCase();
-}
 
 function extractRequestedLiters(text = "") {
   const match = text.match(/(\d+(?:[.,]\d+)?)\s*(?:l|lt|litro|litros)\b/i);
@@ -40,20 +19,14 @@ function normalizeParsedItemsBySize(items = [], message = "") {
   const byId = new Map(products.map((p) => [p.id, p]));
   return (items || []).map((item) => {
     const product = byId.get(item.productId);
-    if (!product || typeof product.sizeL !== "number") return item;
+    const requestedLiters = extractRequestedLiters(`${item.matchedName || ""} ${message}`);
+    if (!requestedLiters) return item;
 
-    const requestedLiters = extractRequestedLiters(item.matchedName || message);
-    if (!requestedLiters || product.sizeL === requestedLiters) return item;
-
-    const familyKey = getProductFamilyKey(product.name);
-    const candidate = products.find(
-      (p) =>
-        typeof p.sizeL === "number" &&
-        p.sizeL === requestedLiters &&
-        getProductFamilyKey(p.name) === familyKey
-    );
-
-    return candidate ? { ...item, productId: candidate.id } : item;
+    const candidate = products.find((p) => p.sizeL === requestedLiters);
+    if (candidate && (!product || product.sizeL !== requestedLiters)) {
+      return { ...item, productId: candidate.id };
+    }
+    return item;
   });
 }
 
@@ -79,18 +52,19 @@ function getClient() {
   return openai;
 }
 
-function getAgentOpenAIClient() {
-  const { endpoint, agentName, agentVersion } = getAgentConfig();
-  if (!endpoint || !agentName || !agentVersion) {
-    throw new Error("AZURE_AI_PROJECT_ENDPOINT, AZURE_AI_AGENT_NAME, and AZURE_AI_AGENT_VERSION are required");
+function extractAgentOutputText(payload) {
+  if (!payload) return "";
+  if (typeof payload.output_text === "string" && payload.output_text.trim()) {
+    return payload.output_text;
   }
 
-  if (!agentOpenAIClient) {
-    const projectClient = new AIProjectClient(endpoint, new DefaultAzureCredential());
-    agentOpenAIClient = projectClient.getOpenAIClient();
+  const parts = [];
+  for (const item of payload.output || []) {
+    for (const content of item.content || []) {
+      if (typeof content.text === "string") parts.push(content.text);
+    }
   }
-
-  return { client: agentOpenAIClient, agentName, agentVersion };
+  return parts.join("\n").trim();
 }
 
 function parseAgentOutput(outputText) {
@@ -111,41 +85,55 @@ function parseAgentOutput(outputText) {
 }
 
 async function parseShoppingRequestWithAgent(message) {
-  const { client, agentName, agentVersion } = getAgentOpenAIClient();
+  const catalog = products.map((p) => ({
+    id: p.id,
+    name: p.name,
+    nameEn: p.nameEn,
+    sizeL: p.sizeL,
+    price: p.price,
+    unit: p.unit,
+    tags: p.tags.join(", "),
+  }));
 
-  const conversation = await client.conversations.create({
-    items: [
-      {
-        type: "message",
-        role: "user",
-        content:
-          `Analiza esta solicitud de compra para el catálogo de MioClean y responde SOLO con JSON válido.\n\n` +
-          `Estructura exacta requerida:\n` +
-          `{"items":[{"productId":"MC-XXX","quantity":1,"matchedName":"texto original"}],"unrecognized":[],"summary":"resumen breve en español"}\n\n` +
-          `Mensaje del cliente: ${message}`,
-      },
-    ],
+  const input =
+    `Analiza esta solicitud de compra para el catálogo de MioClean y responde SOLO con JSON válido.\n\n` +
+    `Catálogo:\n${JSON.stringify(catalog)}\n\n` +
+    `Estructura exacta requerida:\n` +
+    `{"items":[{"productId":"MC-XXX","quantity":1,"matchedName":"texto original"}],"unrecognized":[],"summary":"resumen breve en español"}\n\n` +
+    `Reglas: si el cliente pide bidones de 5 litros usa MC-005; 4 litros MC-004; 1 litro MC-001. ` +
+    `Si no indica cantidad, asume 1. El precio es 15 Bs por litro.\n\n` +
+    `Mensaje del cliente: ${message}`;
+
+  const response = await fetch(getAgentResponsesUrl(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(await getAgentAuthHeaders()),
+    },
+    body: JSON.stringify({ input, stream: false }),
   });
 
-  const response = await client.responses.create(
-    { conversation: conversation.id },
-    {
-      body: {
-        agent: {
-          name: agentName,
-          version: agentVersion,
-          type: "agent_reference",
-        },
-      },
-    }
-  );
+  const rawBody = await response.text();
+  if (!response.ok) {
+    const err = new Error(`Azure AI agent error (${response.status}): ${rawBody.slice(0, 400)}`);
+    err.status = response.status === 401 || response.status === 403 ? 503 : 502;
+    throw err;
+  }
 
-  const parsed = parseAgentOutput(response.output_text);
+  let payload;
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    payload = { output_text: rawBody };
+  }
+
+  const outputText = extractAgentOutputText(payload) || rawBody;
+  const parsed = parseAgentOutput(outputText);
   return {
     items: Array.isArray(parsed.items) ? parsed.items : [],
     unrecognized: Array.isArray(parsed.unrecognized) ? parsed.unrecognized : [],
     summary: typeof parsed.summary === "string" ? parsed.summary : "Pedido procesado",
-    raw: response.output_text,
+    raw: outputText,
   };
 }
 
@@ -160,11 +148,13 @@ async function parseShoppingRequest(message) {
   let parsed;
   let raw;
 
-  if (shouldUseAgentParse()) {
+  try {
     const agentParsed = await parseShoppingRequestWithAgent(message);
     parsed = agentParsed;
     raw = agentParsed.raw;
-  } else {
+  } catch (agentErr) {
+    if (!process.env.AZURE_OPENAI_API_KEY) throw agentErr;
+    console.warn("Azure agent parse failed, falling back to Azure OpenAI:", agentErr.message);
     const client = getClient();
 
     const catalog = products.map((p) => ({
