@@ -7,6 +7,7 @@ const path = require("path");
 const rateLimit = require("express-rate-limit");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./src/swagger");
+const { getAgentResponsesUrl, getAuthStatus } = require("./src/config/azureAuth");
 
 // Routes
 const productsRouter = require("./src/routes/products");
@@ -47,6 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ─── Static Files ─────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/img", express.static(path.join(__dirname, "img")));
 
 // ─── Swagger UI ───────────────────────────────────────────────────────────────
 app.use(
@@ -80,6 +82,7 @@ app.use("/api", generalLimiter);
 app.use("/api/products", productsRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/ai", aiRouter);
+app.use("/api/pedido-inteligente", require("./src/routes/pedidoInteligente"));
 app.use("/api/orders", ordersRouter);
 app.use("/api/contact", contactRouter);
 
@@ -116,14 +119,16 @@ app.use("/api/contact", contactRouter);
  *                   example: configured
  */
 app.get("/api/health", (req, res) => {
-  const hasAgentConfig = Boolean(process.env.AZURE_AI_PROJECT_ENDPOINT && process.env.AZURE_AI_AGENT_NAME && process.env.AZURE_AI_AGENT_VERSION);
+  const auth = getAuthStatus();
   res.json({
     status: "ok",
     service: "MioClean API",
     version: "1.0.0",
     timestamp: new Date().toISOString(),
-    ai_backend: hasAgentConfig ? "azure-ai-agent" : "azure-openai",
-    ai_configured: process.env.AZURE_OPENAI_API_KEY ? "configured" : "not configured",
+    ai_backend: "azure-ai-agent",
+    auth_mode: auth.mode,
+    auth_source: auth.source,
+    agent_endpoint: getAgentResponsesUrl(),
   });
 });
 
@@ -147,8 +152,9 @@ if (require.main === module) {
     console.log(`\n🧹 MioClean API running at http://localhost:${PORT}`);
     console.log(`📚 Swagger docs:      http://localhost:${PORT}/api-docs`);
     console.log(`📄 OpenAPI JSON:      http://localhost:${PORT}/api-docs.json`);
-    console.log(`🔑 Azure OpenAI:      ${process.env.AZURE_OPENAI_API_KEY ? "✅ Configured" : "❌ Not configured (set AZURE_OPENAI_API_KEY)"}`);
-    console.log(`🤖 Azure AI Agent:    ${process.env.AZURE_AI_PROJECT_ENDPOINT && process.env.AZURE_AI_AGENT_NAME && process.env.AZURE_AI_AGENT_VERSION ? "✅ Enabled for parse" : "⚪ Disabled (set AZURE_AI_PROJECT_ENDPOINT, AZURE_AI_AGENT_NAME, AZURE_AI_AGENT_VERSION)"}\n`);
+    const auth = getAuthStatus();
+    console.log(`🔑 Auth:              ${auth.mode === "api-key" ? `✅ ${auth.source}` : "⚪ DefaultAzureCredential (set AZURE_AI_API_KEY or AZURE_OPENAI_API_KEY)"}`);
+    console.log(`🤖 Agent endpoint:    ${getAgentResponsesUrl()}\n`);
   });
 }
 

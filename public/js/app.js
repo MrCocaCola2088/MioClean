@@ -23,7 +23,7 @@ function showToast(msg, type = '') {
   setTimeout(() => { t.className = 'toast'; }, 3000);
 }
 
-function fmt(n) { return '$' + Number(n).toFixed(2); }
+function fmt(n) { return `${Math.round(Number(n))}bs`; }
 
 function categoryEmoji(cat) {
   const map = {
@@ -85,13 +85,12 @@ function renderCart() {
 
   itemsEl.innerHTML = cartData.items.map(item => `
     <div class="cart-item">
-      <div class="cart-item-icon">${categoryEmoji(item.productId)}</div>
+      <div class="cart-item-icon">${item.image ? `<img src="${item.image}" alt="${item.name}" />` : categoryEmoji(item.productId)}</div>
       <div class="cart-item-info">
         <div class="cart-item-name">${item.name}</div>
-        <div class="cart-item-qty">×${item.quantity} ${item.unit}</div>
+        <div class="cart-item-qty">x${item.quantity} unidades ${fmt(item.total)}</div>
       </div>
-      <div class="cart-item-price">${fmt(item.total)}</div>
-      <button class="cart-item-remove" data-id="${item.productId}" title="Remove">✕</button>
+      <button class="cart-item-remove" data-id="${item.productId}" title="Quitar">✕</button>
     </div>
   `).join('');
 
@@ -151,7 +150,7 @@ function closeCart() { cartDrawer.classList.remove('open'); cartOverlay.classLis
 cartToggle.addEventListener('click', openCart);
 closeCartBtn.addEventListener('click', closeCart);
 cartOverlay.addEventListener('click', closeCart);
-document.getElementById('clearCartBtn').addEventListener('click', () => { if (confirm('¿Vaciar el carrito?')) clearCart(); });
+document.getElementById('clearCartBtn').addEventListener('click', () => { if (confirm('¿Cancelar el pedido y vaciar el carrito?')) clearCart(); });
 document.getElementById('checkoutBtn').addEventListener('click', () => {
   closeCart();
   document.getElementById('checkoutOverlay').hidden = false;
@@ -274,7 +273,7 @@ function renderProducts(prods) {
             ${isInWishlist(p.id) ? '❤️' : '🤍'}
           </button>
           <button class="add-btn" data-id="${p.id}" ${p.stock === 0 ? 'disabled' : ''}>
-            ${p.stock === 0 ? 'Agotado' : 'Add to Cart'}
+            ${p.stock === 0 ? 'Agotado' : 'Agregar'}
           </button>
         </div>
       </div>
@@ -309,14 +308,14 @@ async function runAiParse({ message, autoAdd }) {
   btn.disabled = true; btn.textContent = '⏳ Analizando...';
 
   try {
-    const res = await fetch(`${API}/api/ai/parse-text`, {
+    const res = await fetch(`${API}/api/pedido-inteligente`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, sessionId: getSessionId(), autoAddToCart: autoAdd }),
+      body: JSON.stringify({ inputText: message, sessionId: getSessionId(), autoAddToCart: autoAdd }),
     });
     const data = await res.json();
     if (!res.ok) { showToast(data.error || 'Error de IA', 'error'); return; }
-    if (autoAdd && data.cart) { cartData = data.cart; renderCart(); }
+    if (autoAdd && data.cart) { cartData = data.cart; renderCart(); openCart(); }
     displayAiResults(data, null);
   } catch (e) { showToast('Error de conexión', 'error'); }
   finally { btn.disabled = false; btn.innerHTML = '<span class="btn-icon">✨</span> Parse with AI'; }
@@ -407,14 +406,14 @@ parseAudioBtn.addEventListener('click', async () => {
   parseAudioBtn.textContent = '⏳ Analizando...';
 
   try {
-    const res = await fetch(`${API}/api/ai/parse-text`, {
+    const res = await fetch(`${API}/api/pedido-inteligente`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, sessionId: getSessionId(), autoAddToCart: autoAdd }),
+      body: JSON.stringify({ inputText: text, sessionId: getSessionId(), autoAddToCart: autoAdd }),
     });
     const data = await res.json();
     if (!res.ok) { showToast(data.error || 'Error de IA', 'error'); return; }
-    if (autoAdd && data.cart) { cartData = data.cart; renderCart(); }
+    if (autoAdd && data.cart) { cartData = data.cart; renderCart(); openCart(); }
     displayAiResults(data, text);
   } catch (e) { showToast('Error de conexión', 'error'); }
   finally { parseAudioBtn.disabled = false; parseAudioBtn.innerHTML = '<span class="btn-icon">✨</span> Parse Order'; }
@@ -459,7 +458,10 @@ function displayAiResults(data, transcription) {
   // Build and display order JSON
   const jsonBlock = document.getElementById('aiJsonBlock');
   const jsonOutput = document.getElementById('aiJsonOutput');
-  if (lastAiItems.length) {
+  if (data.pedido) {
+    jsonOutput.textContent = JSON.stringify(data.pedido, null, 2);
+    jsonBlock.hidden = false;
+  } else if (lastAiItems.length) {
     const orderItems = lastAiItems.map(item => ({
       productId: item.productId,
       nombre: item.product?.name || item.productId,

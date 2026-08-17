@@ -6,51 +6,13 @@ const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 const { v4: uuidv4 } = require("uuid");
 const { parseShoppingRequest, transcribeAudio, getRecommendations } = require("../services/openai");
-const { addItemToCart, getOrCreateCart } = require("../models/cart");
+const { processPedidoInteligente, autoAddValidatedItemsToCart } = require("../services/pedidoInteligente");
 const { products } = require("../models/products");
 
 const UPLOADS_DIR = path.resolve(__dirname, "../../uploads");
 
 // Tighter rate limit for AI endpoints (they call external APIs and handle file uploads)
 const aiLimiter = rateLimit({ windowMs: 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
-
-function isAiConfigurationError(err) {
-  const message = err?.message || "";
-  return /AZURE_|DefaultAzureCredential|credential/i.test(message);
-}
-
-function createCartValidationError(message) {
-  const err = new Error(message);
-  err.status = 400;
-  return err;
-}
-
-function validateCartQuantity(product, quantity) {
-  const qty = Number.parseInt(quantity, 10);
-
-  if (!Number.isFinite(qty) || qty < 1) {
-    throw createCartValidationError("productId y quantity son requeridos / productId and quantity are required");
-  }
-
-  if (product.stock < qty) {
-    throw createCartValidationError(`Stock insuficiente / Insufficient stock. Available: ${product.stock}`);
-  }
-
-  return qty;
-}
-
-function autoAddValidatedItemsToCart(sessionId, items) {
-  const validatedItems = items.map((item) => ({
-    item,
-    quantity: validateCartQuantity(item.product, item.quantity),
-  }));
-
-  for (const { item, quantity } of validatedItems) {
-    addItemToCart(sessionId, item.product, quantity);
-  }
-
-  return getOrCreateCart(sessionId);
-}
 
 // Multer config for audio uploads
 const storage = multer.diskStorage({
@@ -169,8 +131,8 @@ router.post("/transcribe", aiLimiter, upload.single("audio"), async (req, res) =
  *   post:
  *     summary: Parse a text message into cart items
  *     description: |
- *       Sends a natural-language text message (Spanish or English) to OpenAI GPT and returns
- *       matched products from the MioClean catalog. The matched products can be optionally
+ *       Sends a natural-language text message to AgenteMioClean (Azure AI Responses)
+ *       and returns matched products from the MioClean catalog. The matched products can be optionally
  *       added to a cart session automatically.
  *     tags: [AI]
  *     requestBody:
@@ -223,30 +185,12 @@ router.post("/parse-text", aiLimiter, async (req, res) => {
   }
 
   try {
-    const parsed = await parseShoppingRequest(message.trim());
-
-    // Enrich with product details
-    const enrichedItems = parsed.items
-      .map((item) => {
-        const product = products.find((p) => p.id === item.productId);
-        if (!product) return null;
-        return { ...item, product };
-      })
-      .filter(Boolean);
-
-    // Auto-add to cart if requested
-    let cart = null;
-    if (autoAddToCart && sessionId) {
-      cart = autoAddValidatedItemsToCart(sessionId, enrichedItems);
-    }
-
-    res.json({
-      success: true,
-      message: parsed.summary,
-      items: enrichedItems,
-      unrecognized: parsed.unrecognized || [],
-      cart,
+    const data = await processPedidoInteligente({
+      inputText: message.trim(),
+      sessionId,
+      autoAddToCart,
     });
+    res.json(data);
   } catch (err) {
     if (err.status) {
       return res.status(err.status).json({ success: false, error: err.message });

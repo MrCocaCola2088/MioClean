@@ -37,6 +37,32 @@ test.describe('MioClean IA pedidos flow', () => {
     expect(json.items.length).toBeGreaterThan(0);
   });
 
+  test('POST /api/pedido-inteligente returns structured cart JSON for 2 bidones de 5L', async ({ request }) => {
+    test.skip(aiProbeStatus !== 200, `AI backend not available (probe returned ${aiProbeStatus})`);
+
+    const sessionId = 'test-session-pedido-inteligente';
+    const response = await request.post(`${API_URL}/api/pedido-inteligente`, {
+      data: {
+        inputText: 'quiero 2 bidones de 5 litros',
+        sessionId,
+        autoAddToCart: true,
+      },
+    });
+
+    expect(response.status()).toBe(200);
+    const json = await response.json();
+    expect(json.success).toBeTruthy();
+    expect(json.pedido).toBeTruthy();
+    expect(json.pedido.items.length).toBeGreaterThan(0);
+    expect(json.pedido.items[0].litros).toBe(5);
+    expect(json.pedido.items[0].cantidad).toBe(2);
+    expect(json.pedido.subtotal).toBe(150);
+    expect(json.pedido.delivery).toBe(18);
+    expect(json.pedido.total).toBe(168);
+    expect(json.cart).toBeTruthy();
+    expect(json.cart.items.length).toBeGreaterThan(0);
+  });
+
   test('POST /api/ai/parse-text can auto-add matched items to a cart session', async ({ request }) => {
     test.skip(aiProbeStatus !== 200, `AI backend not available (probe returned ${aiProbeStatus})`);
 
@@ -113,10 +139,20 @@ test.describe('MioClean IA pedidos flow', () => {
     expect(json.success).toBeFalsy();
   });
 
+  test('POST /api/pedido-inteligente rejects missing inputText', async ({ request }) => {
+    const response = await request.post(`${API_URL}/api/pedido-inteligente`, {
+      data: {},
+    });
+
+    expect(response.status()).toBe(400);
+    const json = await response.json();
+    expect(json.success).toBeFalsy();
+  });
+
   test.describe('Spanish size-based shopping requests reflect the matched product in the cart', () => {
     const cases = [
       { message: 'Quiero comprar una sachet o paquete de 1 litro', sessionId: 'test-session-ia-1l', expectedSizeL: 1 },
-      { message: 'quiero comprar una botella de 4 litros', sessionId: 'test-session-ia-4l', expectedSizeL: null },
+      { message: 'quiero comprar una botella de 4 litros', sessionId: 'test-session-ia-4l', expectedSizeL: 4 },
       { message: 'quiero un bidon de 5 litros', sessionId: 'test-session-ia-5l', expectedSizeL: 5 },
     ];
 

@@ -31,11 +31,15 @@ npm install
 
 ```bash
 cp .env.example .env
-# Edit .env and set your GITHUB_TOKEN
 ```
 
-Generate a GitHub token at: https://github.com/settings/tokens  
-*(No special scopes required for GitHub Models free tier)*
+Auth for `POST /api/ai/parse-text` (AgenteMioClean):
+
+1. `AZURE_AI_API_KEY` (preferred)
+2. or `AZURE_OPENAI_API_KEY` if the first is empty
+3. or `DefaultAzureCredential` (`az login`) if neither key is set
+
+Optional: override the agent URL with `AZURE_AI_AGENT_RESPONSES_URL`.
 
 ### 3. Start
 
@@ -78,7 +82,8 @@ Open http://localhost:3000
 #### AI (GitHub Models)
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/ai/parse-text` | Parse text → cart items |
+| `POST` | `/api/pedido-inteligente` | Texto natural → JSON de pedido + carrito |
+| `POST` | `/api/ai/parse-text` | Alias del parseo de texto |
 | `POST` | `/api/ai/parse-audio` | Transcribe audio → cart items |
 | `POST` | `/api/ai/recommendations` | AI product recommendations |
 
@@ -92,6 +97,17 @@ Open http://localhost:3000
 ---
 
 ## 🤖 AI Integration Example
+
+### Pedido inteligente
+```bash
+curl -X POST http://localhost:3000/api/pedido-inteligente \
+  -H "Content-Type: application/json" \
+  -d '{
+    "inputText": "quiero 2 bidones de 5 litros",
+    "sessionId": "my-session-id",
+    "autoAddToCart": true
+  }'
+```
 
 ### Parse a text order
 ```bash
